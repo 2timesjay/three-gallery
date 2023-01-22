@@ -31,8 +31,9 @@
 			let camera, scene, renderer, controls, stats;
 
 			let mesh;
-			const amount = parseInt( window.location.search.slice( 1 ) ) || 50;
-			const count = Math.pow( amount, 3 );
+			const max_amount = 12;
+			const amount = parseInt( window.location.search.slice( 1 ) ) || max_amount;
+			const count = Math.pow( max_amount, 3 );
 
 			const raycaster = new THREE.Raycaster();
 			const mouse = new THREE.Vector2( 1, 1 );
@@ -46,7 +47,7 @@
 			function init() {
 
 				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 300 );
-				camera.position.set( amount, amount, amount );
+				camera.position.set( max_amount, max_amount, max_amount );
 				camera.lookAt( 0, 0, 0 );
 
 				scene = new THREE.Scene();
@@ -61,15 +62,15 @@
 				mesh = new THREE.InstancedMesh( geometry, material, count );
 
 				let i = 0;
-				const offset = ( amount - 1 ) / 2;
+				const offset = ( max_amount - 1 ) / 2;
 
 				const matrix = new THREE.Matrix4();
 
-				for ( let x = 0; x < amount; x ++ ) {
-
-					for ( let y = 0; y < amount; y ++ ) {
-
-						for ( let z = 0; z < amount; z ++ ) {
+				for (let layer = 0; layer < max_amount; layer++) {
+					// Construct concentric shells of cubes
+					let x = layer;
+					for ( let y = 0; y <= layer; y ++ ) {
+						for ( let z = 0; z <= layer; z ++ ) {
 
 							matrix.setPosition( offset - x, offset - y, offset - z );
 
@@ -77,19 +78,44 @@
 							mesh.setColorAt( i, color );
 
 							i ++;
-
 						}
-
 					}
+					let y = layer;
+					for ( let x = 0; x <= layer; x ++ ) {
+						for ( let z = 0; z <= layer; z ++ ) {
+							if (x == layer) {
+								continue;
+							}
 
+							matrix.setPosition( offset - x, offset - y, offset - z );
+
+							mesh.setMatrixAt( i, matrix );
+							mesh.setColorAt( i, color );
+
+							i ++;
+						}
+					}
+					let z = layer;
+					for ( let x = 0; x <= layer; x ++ ) {
+						for ( let y = 0; y <= layer; y ++ ) {
+							if (x == layer || y == layer) {
+								continue;
+							}
+
+							matrix.setPosition( offset - x, offset - y, offset - z );
+
+							mesh.setMatrixAt( i, matrix );
+							mesh.setColorAt( i, color );
+
+							i ++;
+						}
+					}
 				}
 
 				scene.add( mesh );
 
-				//
-
 				const gui = new GUI();
-				gui.add( mesh, 'count', 0, count );
+				gui.add( mesh, 'count', 0, Math.pow(max_amount, 3) );
 
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
@@ -130,6 +156,7 @@
 			function animate() {
 
 				requestAnimationFrame( animate );
+				console.log(mesh.count);
 
 				controls.update();
 
