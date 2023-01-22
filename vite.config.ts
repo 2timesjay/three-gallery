@@ -9,6 +9,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         gallery: resolve(__dirname, 'gallery/index.html'),
+        webgl_instancing_raycast: resolve(__dirname, 'gallery/webgl_instancing_raycast/index.html'),
       },
     },
   },
